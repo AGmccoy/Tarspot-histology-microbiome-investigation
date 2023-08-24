@@ -1,7 +1,7 @@
-# Tarspot-histology-microbiome-investigation
-Investigating tarspot microbiome via DIAMOND and MEGAN to attempt identification of two unknown fungi found within tarspot stroma
+# Uncovering the Infection Strategy of Phyllachora maydis during Maize Colonization: A Comprehensive Analysis
+## Caldwell, D.L., Da Silva, C.R., McCoy, A.G., Avila, H., Bonkowski, J.C., Chilvers, M.I., Helm, M., Tilenko, D.E.P., and Iyer-Pascuzzi, A.S. 202X 
 
-Part of the "Uncovering the Infection Strategy of Phyllachora maydis during Maize Colonization: A Comprehensive Analysis" manuscruipt (Caldwell et al 202X)
+Investigating tarspot microbiome via DIAMOND and MEGAN to attempt identification of two unknown fungi found within tarspot stroma
 
 Illumina reads were first trimmed to Q20 before filtering out corn and Phyllachora maydis sequences. Remaining reads were mapped to the NCBI-nr database and identified via DIAMOND and MEGAN programs at the Michigan State University HPCC.
 

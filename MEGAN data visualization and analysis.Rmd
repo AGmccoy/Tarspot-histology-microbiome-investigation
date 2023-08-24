@@ -1,0 +1,282 @@
+---
+title: "Tar Spot shotgun sequencing microbiome"
+author: "Austin McCoy"
+date: "3/14/2023"
+output: html_document
+---
+loading in the packages needed
+```{r}
+library(tidyverse)
+library(readr)
+library(stringi)
+library(extrafont)
+font_import()
+```
+
+Loading in the raw data, removing any Genera that has less than 1,000 reads 
+```{r}
+sample1 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample1_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_1"), .before=Genus)
+
+sample3 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample3_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_3"), .before=Genus)
+  
+sample4 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample4_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_4"), .before=Genus)
+  
+#sample5 <-
+  
+sample6 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample6_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_6"), .before=Genus)
+  
+sample7 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample7_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_7"), .before=Genus)
+  
+sample8 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample8_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_8"), .before=Genus)
+  
+#sample9 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy #results/sample9_nomap_sorted-ex.txt", 
+#    delim = "\t", escape_double = FALSE, 
+#    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+#    subset(., read_count >= 1000) %>%
+#    mutate(sample=c("Sample_9"), .before=Genus)
+  
+sample10 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample10_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_10"), .before=Genus)
+  
+sample11 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample11_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_11"), .before=Genus)
+  
+sample12 <- read_delim("L:/Austin/! Telenko-Iyer_Pascuzzi TS shotgun seq project/MEGAN taxonomy results/sample12_nomap_sorted-ex.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_names = c("Genus", "read_count"), trim_ws = TRUE) %>%
+    subset(., read_count >= 1000) %>%
+    mutate(sample=c("Sample_12"), .before=Genus)
+
+all_samples <- rbind(sample1, sample3, sample4, sample6, sample7, sample8, sample10, sample11, sample12)
+
+```
+
+pulling all genera found (reads >1,000), seperating them by fungi, bacteria, and "other" (plant, Birds, etc)
+```{r}
+all_genera <- unique(all_samples$Genus)
+
+sample6_genera <- unique(sample6$Genus)
+
+sample11_genera <- unique(sample11$Genus)
+
+all_genera
+
+all_samples_complete <- all_samples %>%
+  complete(sample, Genus)
+
+
+bacteria <- c("Hymenobacter", "Lichenibacterium","Methylobacterium","Methylorubrum","unclassified Rickettsiales", "Sphingomonas","Klebsiella","Pantoea","Acinetobacter","Pseudomonas","Corynebacterium","Lawsonella","Klenkia","Kineococcus","Pseudokineococcus","Quadrisphaera","Brachybacterium","Amnibacterium","Curtobacterium","Micrococcus","Cutibacterium","Microlunatus","Nakamurella","Deinococcus","Spirosoma","unclassified Cytophagaceae","Aureimonas","Belnapia","Roseomonas","unclassified Xanthomonadaceae","Frigoribacterium","Microbacterium","Nocardioides","Streptomyces","Bacillales","Variovorax","Luteibacter","Geodermatophilus","unclassified Geodermatophilaceae","Marmoricola","Salmonella","Alkalihalobacillus","Planoprotostelium","Bradyrhizobiaceae","Phyllobacteriaceae","Rhizobium/Agrobacterium group","Azospirillum","Rickettsiaceae","Sphingobium","Herbaspirillum","Massilia group","unclassified Oxalobacteraceae","Mycobacterium","Rathayibacter","Aeromicrobium","Clostridioides","bacterium", "Actinomyces", "Bradyrhizobium", "Clostridium", "Erwinia", "Escherichia", "Staphylococcus", "Delftia", "Kocuria", "Kosakonia", "Micromonospora", "Paracoccus", "Streptococcus")
+
+fungal <- c("Aplosporella","Lizonia","Aureobasidium","Cercospora","Pseudocercospora","Pithomyces","Lophiotrema","Bimuria","Didymosphaeria","Karstenula","Paraphaeosphaeria","Lentithecium","Byssothecium","Massarina","Stagonospora","Periconia","Trematosphaeria","Coniothyrium","Pyrenochaeta","Didymella","Epicoccum","Parastagonospora","Phaeosphaeria","Alternaria","Bipolaris","Pyrenophora","Glonium","Aspergillus","Leptogium","Rhynchosporium","Claviceps","Epichloe","Fusarium","Ophiocordyceps","Ceratocystis","Coniochaeta","Chaetomiaceae","Saitoella","Filobasidium","Kwoniella","Saitozyma","Diversispora","Saccharomycodes","Amniculicola","Ampelomyces","Curvularia","Polyplosphaeria","Agaricales","Cryptococcus","Kockovaella","Naematelia","Tremella","unclassified Tremellales","Rhodotorula","Sporidiobolus","Tilletiopsis","Piloderma","Teratosphaeriaceae","Mytilinidiaceae","Lophiostoma","Pleosporales incertae sedis","Cucurbitaria","Paraphoma","Cyphellophora","Herpotrichiellaceae","Sclerotiniaceae","Colletotrichum","Diaporthales","Sporocadaceae","Cantharellales","Cutaneotrichosporon","Trichosporon","Puccinia","Corynespora","Apiotrichum", "Arthonia", "Exidia", "Fibularhizoctonia", "Malassezia", "Russula", "Venturia", "Dothidotthia", "Hortaea", "Rachicladosporium", "Thermothielavioides", "Lachnellula")
+
+others <- c("Charadrius","Lupinus","Zea","Panicum","Tinamus","Arthropoda","Oryza","Stylonychia","lamiids","Castanea","Catarrhini","Not assigned", "Homo", "Streblomastix", "Heterodermia", "Timema", "Sorghum", "unclassified Myoviridae")
+
+all_fungi <- all_samples_complete %>%
+  filter(., Genus %in% fungal)
+
+all_bacteria <- all_samples_complete %>%
+  filter(., Genus %in% bacteria)
+
+all_others <- all_samples_complete %>%
+  filter(., Genus %in% others)
+
+finding_new_fungi <- all_samples_complete %>% # run this after running the below code, just making sure we have everything
+  subset(., !Genus %in% bacteria) %>% 
+  subset(., !Genus %in% fungal) %>%
+  subset(., !Genus %in% others) %>%
+  distinct(data.frame(Genus))
+
+
+#all_fungi_sample_types <- all_fungi
+
+#write.csv(finding_new_fungi, "new genera to add.csv")
+```
+
+Heatmap for fungal read counts over 1,000 by sample
+```{r}
+sample_order <- c("Sample_1", "Sample_3", "Sample_4", "Sample_6", "Sample_7", "Sample_8", "Sample_10", "Sample_11","Sample_12")
+
+fungal <- factor(fungal, levels = rev(fungal))
+
+fungi_sample_counts <- ggplot(all_fungi, aes(x=factor(sample,level=sample_order), y=Genus, fill=read_count)) +
+  geom_tile(color="black", size=0.1) +
+  scale_fill_gradient(low = "#0ADCF5", 
+                      high = "#F5230A", 
+                      guide = "colorbar",
+                      breaks = c(10000, 75000, 150000, 225000, 300000),
+                      na.value="white") +
+  theme(panel.background = element_rect(fill="white", color="white")) +
+  guides(fill=guide_colorbar(barheight = 15)) +
+  theme(axis.text.x = element_text(size = 10, face = "bold", family = "serif", angle = 45, hjust=1),
+    axis.text.y = element_text(size = 10, face = "bold", family = "serif"),
+    axis.title.x = element_text(size = 20, face = "bold", family = "serif"),
+    axis.title.y = element_text(size = 20, face = "bold", family = "serif"),
+    axis.line.x = element_line(colour = 'gray', size=0.5, linetype='solid'),
+    axis.line.y = element_line(colour = 'gray', size=0.5, linetype='solid'),
+    legend.text = element_text(size = 10, face = "bold", family = "serif"),
+    legend.key = element_blank(),
+    legend.title = element_text(size = 10, face="bold", family = "serif"),
+    legend.position = "right",
+    strip.text.x = element_text(size = 15, face = "bold", family = "serif"),
+    title = element_text(size = 10, family = "serif")) +
+  xlab("Stroma Sample") + ylab("Genus") +
+  scale_x_discrete(labels=c("Sample_1"="1", "Sample_3"="3", "Sample_4"="4", "Sample_6"="6", "Sample_7"="7", "Sample_8"="8", "Sample_11"="11", "Sample_10"="10","Sample_12"="12")) +
+  labs(fill = "Read Count") +
+  scale_y_discrete(limits=rev(levels(factor(all_fungi$Genus)))) +
+      ggtitle("Fungal Community of Phyllachora stroma")
+
+fungi_sample_counts
+
+#ggsave("Fungi samples counts over 1000_teal2red_borders.png", fungi_sample_counts, width=7, height = 12, units=c("in"), dpi=600)
+
+```
+
+
+Combing sample types to find unique fungi
+```{r}
+composite_sample_types <- all_fungi
+
+composite_sample_types$sample <- stri_replace_all_regex(composite_sample_types$sample, pattern = c('Sample_1', 'Sample_3', 'Sample_7', 'Sample_8'), replacement=c('Pmaydis_only', 'Pmaydis_only', 'Pmaydis_only', 'Pmaydis_only'), vectorize=FALSE)
+
+composite_sample_types$sample <- stri_replace_all_regex(composite_sample_types$sample, pattern = c('Sample_4', 'Sample_6', 'Sample_10', 'Sample_11', 'Sample_12'), replacement=c('coni_unknown', 'coni_unknown', 'coni_unknown', 'coni_unknown', 'coni_unknown'), vectorize=FALSE)
+
+composite_sample_types$sample <- gsub('Pmaydis_only0|Pmaydis_only1|Pmaydis_only2', 'Pmaydis_only', composite_sample_types$sample)
+
+unique(composite_sample_types$sample)
+
+
+composite_sample_types
+
+composite_sample_types[is.na(composite_sample_types)] <- 0
+
+composite_summary <- composite_sample_types %>%
+  group_by(sample, Genus) %>%
+  summarise(mean_read_count = mean(read_count))
+  
+composite_summary
+
+coni_unk_minus_pmaydisonly <- composite_summary %>%
+  spread(., key = sample, value = mean_read_count) %>%
+  mutate(coni_unk_mean_diff = coni_unknown-Pmaydis_only)
+
+#write_excel_csv(coni_unk_minus_pmaydisonly, "composite of samples and mean differences between read counts.csv")
+summary(composite_summary$mean_read_count)
+
+coni_unk_minus_pmaydisonly$value <- "value" # just to plot this easier
+
+fonts()
+
+  # just a look for curiosity sake
+composite_mean_counts <- ggplot(composite_summary, aes(x=sample, y=reorder(Genus, mean_read_count), fill=mean_read_count)) +
+  geom_tile(color="black", size=0.1) +
+  scale_fill_gradient(low = "#0ADCF5", 
+                      high = "#F5230A", 
+                      guide = "colorbar",
+                      breaks = c(10000, 75000, 150000, 225000, 260000),
+                      na.value="white") +
+  theme(panel.background = element_rect(fill="white", color="white")) +
+  guides(fill=guide_colorbar(barheight = 15)) +
+  theme(axis.text.x = element_text(size = 9, face = "italic", family = "Arial", angle = 45, hjust=1),
+    axis.text.y = element_text(size = 9, face = "bold", family = "Arial"),
+    axis.title.x = element_text(size = 9, face = "bold", family = "Arial"),
+    axis.title.y = element_text(size = 9, face = "bold", family = "Arial"),
+    axis.line.x = element_line(colour = 'gray', size=0.5, linetype='solid'),
+    axis.line.y = element_line(colour = 'gray', size=0.5, linetype='solid'),
+    legend.text = element_text(size = 9, face = "bold", family = "Arial"),
+    legend.key = element_blank(),
+    legend.title = element_text(size = 9, face="bold", family = "Arial"),
+    legend.position = "right",
+    strip.text.x = element_text(size = 9, face = "bold", family = "Arial"),
+    title = element_text(size = 9, family = "Arial")) +
+  xlab("Sample Type") + ylab("Sequence Taxonomic Classification") +
+scale_x_discrete(labels=str_wrap(c("Paraphaeosphaeria spp. and Unkown fungus", "P. maydis only"),width = 25)) +
+  labs(fill = "Mean Read count") +
+  #scale_y_discrete(limits=rev(levels(factor(composite_summary$Genus)))) +
+      ggtitle("Fungal Community of Phyllachora stroma")
+
+composite_mean_counts
+
+ggsave("composite mean sample reads between 4x conio_unknown and 5x pmaydis only samples 7x9,7.png", composite_mean_counts, width=7, height = 9.7, units=c("in"), dpi=600)
+
+```
+
+
+Heatmap for bacterial read counts over 1,000 by sample
+```{r}
+bacterial_sample_counts <- ggplot(all_bacteria, aes(x=factor(sample,level=sample_order), y=Genus, fill=read_count)) +
+  geom_tile() +
+  theme(axis.text.x = element_text(size = 10, face = "bold", family = "serif", angle = 45, hjust=1),
+    axis.text.y = element_text(size = 10, face = "bold", family = "serif"),
+    axis.title.x = element_text(size = 20, face = "bold", family = "serif"),
+    axis.title.y = element_text(size = 20, face = "bold", family = "serif"),
+    axis.line.x = element_line(colour = 'gray', size=0.5, linetype='solid'),
+    axis.line.y = element_line(colour = 'gray', size=0.5, linetype='solid'),
+    legend.text = element_text(size = 10, face = "bold", family = "serif"),
+    legend.key = element_blank(),
+    legend.title = element_text(size = 10, face="bold", family = "serif"),
+    legend.position = "right",
+    strip.text.x = element_text(size = 15, face = "bold", family = "serif"),
+    title = element_text(size = 10, family = "serif")) +
+  xlab("Sample") + ylab("Genus") +
+      ggtitle("Bacterial Community: Samples >1,000 reads")
+
+bacterial_sample_counts
+
+ggsave("Bacterial samples counts over 1000.png", bacterial_sample_counts, width=7, height = 12, units=c("in"), dpi=600)
+
+```
+
+Heatmap for "other" read counts over 1,000 by sample
+```{r}
+other_sample_counts <- ggplot(all_others, aes(x=factor(sample,level=sample_order), y=Genus, fill=read_count)) +
+  geom_tile() +
+  theme(axis.text.x = element_text(size = 10, face = "bold", family = "serif", angle = 45, hjust=1),
+    axis.text.y = element_text(size = 10, face = "bold", family = "serif"),
+    axis.title.x = element_text(size = 20, face = "bold", family = "serif"),
+    axis.title.y = element_text(size = 20, face = "bold", family = "serif"),
+    axis.line.x = element_line(colour = 'gray', size=0.5, linetype='solid'),
+    axis.line.y = element_line(colour = 'gray', size=0.5, linetype='solid'),
+    legend.text = element_text(size = 10, face = "bold", family = "serif"),
+    legend.key = element_blank(),
+    legend.title = element_text(size = 10, face="bold", family = "serif"),
+    legend.position = "right",
+    strip.text.x = element_text(size = 15, face = "bold", family = "serif"),
+    title = element_text(size = 10, family = "serif")) +
+  xlab("Sample") + ylab("Genus") +
+      ggtitle("Other organisms detected: Samples >1,000 reads")
+
+other_sample_counts
+
+ggsave("other samples counts over 1000.png", other_sample_counts, width=7, height = 12, units=c("in"), dpi=600)
+
+```
